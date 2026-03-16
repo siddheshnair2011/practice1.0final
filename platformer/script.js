@@ -191,24 +191,22 @@ const levels = [
         startY: 500,
         requiredCoins: 4,
         platforms: [
-            { x: 0, y: 700, w: 600, h: 100 },
-            { x: 600, y: 700, w: 200, h: 100 },
-            { x: 800, y: 700, w: 600, h: 100 },
-            { x: 1400, y: 700, w: 600, h: 100 }
+            { x: 0, y: 700, w: 800, h: 100 },
+            { x: 860, y: 700, w: 1140, h: 100 }
         ],
         jumpPads: [],
         speedBoosts: [],
         spikes: [
-            { x: 600, y: 680, w: 200, h: 20 } // Single spike strip on the ground
+            { x: 800, y: 680, w: 60, h: 20 } // Just 3 tiny spikes
         ],
         hazards: [
-            { x: 1450, y: 750, w: 200, h: 50 } // tiny safe lava gap
+            { x: 1400, y: 750, w: 100, h: 50 } // tiny 100px lava gap
         ],
         coins: [
-            { x: 300, y: 650, size: 12, collected: false }, 
-            { x: 700, y: 550, size: 12, collected: false }, // above spike
+            { x: 400, y: 650, size: 12, collected: false }, 
+            { x: 830, y: 550, size: 12, collected: false }, // above spike
             { x: 1100, y: 650, size: 12, collected: false }, 
-            { x: 1550, y: 550, size: 12, collected: false } // above lava
+            { x: 1450, y: 550, size: 12, collected: false } // above lava
         ],
         texts: [
             { text: "Jump over red obstacles! Spikes and Lava hurt.", x: 50, y: 450, size: 24, color: "#ff3366" },
