@@ -9,22 +9,39 @@
 </head>
 <body>
     <h1>Neon Hopper</h1>
-    
-    <div id="game-container">
-        <canvas id="gameCanvas" width="900" height="500"></canvas>
-        
-        <div id="ui">
-            <span id="level-display">Level 1</span>
-            <span id="coin-display"><span class="coin-icon"></span> 0 / 3</span>
-        </div>
-
-        <div id="message-overlay">
-            <div id="message">Level Complete!</div>
-            <div class="instruction">Press [ENTER] to continue</div>
-        </div>
+    <div id="home-menu" class="menu container active">
+        <h2>Main Menu</h2>
+        <div class="total-coins-display">Total Coins: <span id="home-total-coins">0</span> <span class="coin-icon"></span></div>
+        <button id="btn-play">Play Game</button>
+        <button id="btn-shop">Shop</button>
     </div>
 
-    <div class="controls-hint">
+    <div id="shop-menu" class="menu container">
+        <h2>Shop</h2>
+        <div class="total-coins-display">Total Coins: <span id="shop-total-coins">0</span> <span class="coin-icon"></span></div>
+        <div id="shop-items">
+            <!-- Shop items injected via JS -->
+        </div>
+        <button id="btn-back">Back</button>
+    </div>
+
+    <div id="game-wrapper" style="display: none;">
+        <div id="game-container">
+            <canvas id="gameCanvas" width="900" height="500"></canvas>
+            
+            <div id="ui">
+                <span id="level-display">Level 1</span>
+                <span id="coin-display"><span class="coin-icon"></span> 0 / 3</span>
+            </div>
+
+            <div id="message-overlay">
+                <div id="message">Level Complete!</div>
+                <div class="instruction">Press [ENTER] to continue</div>
+            </div>
+        </div>
+    </div> <!-- Close game-wrapper -->
+
+    <div class="controls-hint" id="controls-hint" style="display: none;">
         <span>Use <span class="key">&larr;</span> <span class="key">&rarr;</span> to move</span>
         <span>Use <span class="key">&uarr;</span> to jump</span>
     </div>

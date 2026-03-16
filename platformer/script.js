@@ -1,4 +1,4 @@
-// Constants and Variables
+// DOM Elements
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const levelDisplay = document.getElementById('level-display');
@@ -7,17 +7,107 @@ const messageOverlay = document.getElementById('message-overlay');
 const messageDisplay = document.getElementById('message');
 const instructionDisplay = document.querySelector('.instruction');
 
+// Menu Elements
+const homeMenu = document.getElementById('home-menu');
+const shopMenu = document.getElementById('shop-menu');
+const gameWrapper = document.getElementById('game-wrapper');
+const controlsHint = document.getElementById('controls-hint');
+const btnPlay = document.getElementById('btn-play');
+const btnShop = document.getElementById('btn-shop');
+const btnBack = document.getElementById('btn-back');
+const homeTotalCoins = document.getElementById('home-total-coins');
+const shopTotalCoins = document.getElementById('shop-total-coins');
+const shopItemsContainer = document.getElementById('shop-items');
+
+// Game State & Persistence
 let currentLevelIndex = 0;
-let coinsCollected = 0;
-let gameState = 'playing'; // playing, level_complete, game_over, game_won
+let coinsCollected = 0; // Coins collected in current level
+let gameState = 'menu'; // menu, shop, playing, level_complete, game_over, game_won
 let cameraX = 0;
 
-const keys = {
-    ArrowLeft: false,
-    ArrowRight: false,
-    ArrowUp: false
-};
+let totalCoins = parseInt(localStorage.getItem('neonHopperCoins')) || 0;
+let unlockedSkins = JSON.parse(localStorage.getItem('neonHopperSkins')) || ['#66fcf1'];
 
+const skins = [
+    { id: '#66fcf1', name: 'Classic Cyan', price: 0 },
+    { id: '#ff3366', name: 'Neon Pink', price: 10 },
+    { id: '#FFD700', name: 'Gold Rush', price: 20 },
+    { id: '#00ff00', name: 'Radioactive', price: 30 },
+    { id: '#9932CC', name: 'Deep Purple', price: 40 },
+    { id: '#ffffff', name: 'Ghost White', price: 50 },
+];
+
+function saveProgress() {
+    localStorage.setItem('neonHopperCoins', totalCoins);
+    localStorage.setItem('neonHopperSkins', JSON.stringify(unlockedSkins));
+}
+
+function updateMenuUI() {
+    homeTotalCoins.innerText = totalCoins;
+    shopTotalCoins.innerText = totalCoins;
+    renderShop();
+}
+
+btnPlay.addEventListener('click', () => {
+    homeMenu.classList.remove('active');
+    gameWrapper.style.display = 'block';
+    controlsHint.style.display = 'flex';
+    gameState = 'playing';
+    currentLevelIndex = 0;
+    loadLevel(0);
+});
+
+btnShop.addEventListener('click', () => {
+    homeMenu.classList.remove('active');
+    shopMenu.classList.add('active');
+    gameState = 'shop';
+});
+
+btnBack.addEventListener('click', () => {
+    shopMenu.classList.remove('active');
+    homeMenu.classList.add('active');
+    gameState = 'menu';
+});
+
+function renderShop() {
+    shopItemsContainer.innerHTML = '';
+    skins.forEach(skin => {
+        const item = document.createElement('div');
+        item.className = 'shop-item';
+        
+        const isUnlocked = unlockedSkins.includes(skin.id);
+        const isEquipped = player.color === skin.id;
+
+        item.innerHTML = `
+            <div class="skin-preview" style="background-color: ${skin.id}"></div>
+            <h3>${skin.name}</h3>
+            ${!isUnlocked ? `<div class="price"><span class="coin-icon"></span> ${skin.price}</div>` : ''}
+            <button ${!isUnlocked && totalCoins < skin.price ? 'disabled' : ''}>
+                ${isEquipped ? 'Equipped' : (isUnlocked ? 'Equip' : 'Buy')}
+            </button>
+        `;
+
+        const btn = item.querySelector('button');
+        btn.addEventListener('click', () => {
+            if (!isUnlocked) {
+                if (totalCoins >= skin.price) {
+                    totalCoins -= skin.price;
+                    unlockedSkins.push(skin.id);
+                    player.color = skin.id;
+                    saveProgress();
+                    updateMenuUI();
+                }
+            } else {
+                player.color = skin.id;
+                updateMenuUI();
+            }
+        });
+
+        shopItemsContainer.appendChild(item);
+    });
+}
+
+// Player Object
 const player = {
     x: 50,
     y: 50,
@@ -34,8 +124,15 @@ const player = {
     color: '#66fcf1'
 };
 
+const keys = {
+    ArrowLeft: false,
+    ArrowRight: false,
+    ArrowUp: false
+};
+
 // Level Design
 const levels = [
+    // Level 1
     {
         worldWidth: 1500,
         startX: 50,
@@ -55,6 +152,7 @@ const levels = [
         ],
         hazards: []
     },
+    // Level 2
     {
         worldWidth: 2200,
         startX: 50,
@@ -77,15 +175,16 @@ const levels = [
             { x: 1750, y: 140, size: 12, collected: false }
         ],
         hazards: [
-            { x: 400, y: 450, w: 600, h: 50 }, // lava pit
+            { x: 400, y: 450, w: 600, h: 50 },
             { x: 1300, y: 450, w: 650, h: 50 }
         ]
     },
+    // Level 3
     {
-        worldWidth: 3000,
+        worldWidth: 2600,
         startX: 50,
         startY: 100,
-        requiredCoins: 7,
+        requiredCoins: 6,
         platforms: [
             { x: 0, y: 400, w: 300, h: 100 },
             { x: 400, y: 320, w: 80, h: 20 },
@@ -95,9 +194,7 @@ const levels = [
             { x: 1450, y: 300, w: 80, h: 20 },
             { x: 1650, y: 200, w: 80, h: 20 },
             { x: 1900, y: 350, w: 120, h: 20 },
-            { x: 2200, y: 400, w: 200, h: 100 },
-            { x: 2500, y: 280, w: 80, h: 20 },
-            { x: 2750, y: 400, w: 250, h: 100 }
+            { x: 2200, y: 400, w: 400, h: 100 }
         ],
         coins: [
             { x: 250, y: 360, size: 12, collected: false },
@@ -105,13 +202,100 @@ const levels = [
             { x: 840, y: 120, size: 12, collected: false },
             { x: 1200, y: 360, size: 12, collected: false },
             { x: 1490, y: 260, size: 12, collected: false },
-            { x: 1960, y: 310, size: 12, collected: false },
-            { x: 2540, y: 240, size: 12, collected: false }
+            { x: 1960, y: 310, size: 12, collected: false }
         ],
         hazards: [
             { x: 300, y: 450, w: 800, h: 50 },
-            { x: 1300, y: 450, w: 900, h: 50 },
-            { x: 2400, y: 450, w: 350, h: 50 }
+            { x: 1300, y: 450, w: 900, h: 50 }
+        ]
+    },
+    // Level 4 - Vertical emphasis
+    {
+        worldWidth: 1500,
+        startX: 50,
+        startY: 400,
+        requiredCoins: 4,
+        platforms: [
+            { x: 0, y: 450, w: 200, h: 50 },
+            { x: 300, y: 380, w: 100, h: 20 },
+            { x: 150, y: 280, w: 100, h: 20 },
+            { x: 350, y: 180, w: 100, h: 20 },
+            { x: 600, y: 150, w: 100, h: 20 },
+            { x: 850, y: 250, w: 100, h: 20 },
+            { x: 1100, y: 350, w: 100, h: 20 },
+            { x: 1300, y: 450, w: 200, h: 50 },
+        ],
+        coins: [
+            { x: 350, y: 340, size: 12, collected: false },
+            { x: 200, y: 240, size: 12, collected: false },
+            { x: 400, y: 140, size: 12, collected: false },
+            { x: 1150, y: 310, size: 12, collected: false }
+        ],
+        hazards: [
+            { x: 200, y: 480, w: 1100, h: 30 }
+        ]
+    },
+    // Level 5 - Small jumps
+    {
+        worldWidth: 2000,
+        startX: 50,
+        startY: 200,
+        requiredCoins: 5,
+        platforms: [
+            { x: 0, y: 300, w: 150, h: 200 },
+            { x: 300, y: 300, w: 50, h: 20 },
+            { x: 500, y: 250, w: 50, h: 20 },
+            { x: 700, y: 200, w: 50, h: 20 },
+            { x: 900, y: 150, w: 50, h: 20 },
+            { x: 1100, y: 250, w: 50, h: 20 },
+            { x: 1300, y: 350, w: 50, h: 20 },
+            { x: 1600, y: 400, w: 400, h: 100 }
+        ],
+        coins: [
+            { x: 325, y: 260, size: 12, collected: false },
+            { x: 525, y: 210, size: 12, collected: false },
+            { x: 925, y: 110, size: 12, collected: false },
+            { x: 1125, y: 210, size: 12, collected: false },
+            { x: 1650, y: 360, size: 12, collected: false }
+        ],
+        hazards: [
+            { x: 150, y: 450, w: 1450, h: 50 }
+        ]
+    },
+    // Level 6 - The Gauntlet
+    {
+        worldWidth: 3500,
+        startX: 50,
+        startY: 300,
+        requiredCoins: 8,
+        platforms: [
+            { x: 0, y: 400, w: 200, h: 100 },
+            { x: 350, y: 350, w: 100, h: 20 },
+            { x: 600, y: 300, w: 80, h: 20 },
+            { x: 800, y: 200, w: 80, h: 20 },
+            { x: 1100, y: 150, w: 50, h: 20 },
+            { x: 1350, y: 250, w: 50, h: 20 },
+            { x: 1600, y: 350, w: 100, h: 20 },
+            { x: 1900, y: 400, w: 150, h: 100 },
+            { x: 2200, y: 350, w: 60, h: 20 },
+            { x: 2400, y: 250, w: 60, h: 20 },
+            { x: 2600, y: 150, w: 60, h: 20 },
+            { x: 2900, y: 250, w: 100, h: 20 },
+            { x: 3200, y: 400, w: 300, h: 100 }
+        ],
+        coins: [
+            { x: 400, y: 310, size: 12, collected: false },
+            { x: 840, y: 160, size: 12, collected: false },
+            { x: 1125, y: 110, size: 12, collected: false },
+            { x: 1650, y: 310, size: 12, collected: false },
+            { x: 1975, y: 360, size: 12, collected: false },
+            { x: 2430, y: 210, size: 12, collected: false },
+            { x: 2630, y: 110, size: 12, collected: false },
+            { x: 3300, y: 360, size: 12, collected: false }
+        ],
+        hazards: [
+            { x: 200, y: 450, w: 1700, h: 50 },
+            { x: 2050, y: 450, w: 1150, h: 50 }
         ]
     }
 ];
@@ -123,7 +307,7 @@ function loadLevel(index) {
     if (index >= levels.length) {
         gameState = 'game_won';
         messageDisplay.innerText = "YOU WIN!";
-        instructionDisplay.innerText = "All levels completed successfully";
+        instructionDisplay.innerText = "All levels completed! Press [ENTER] for Home";
         messageOverlay.classList.add('active');
         return;
     }
@@ -215,8 +399,12 @@ window.addEventListener('keydown', (e) => {
             currentLevelIndex++;
             loadLevel(currentLevelIndex);
         } else if (gameState === 'game_won') {
-            currentLevelIndex = 0;
-            loadLevel(0);
+            gameWrapper.style.display = 'none';
+            controlsHint.style.display = 'none';
+            homeMenu.classList.add('active');
+            messageOverlay.classList.remove('active');
+            gameState = 'menu';
+            updateMenuUI();
         }
     }
 });
@@ -333,6 +521,8 @@ function updatePhysics() {
         if (!coin.collected && checkCircleRectCollision({x: coin.x, y: coin.y, size: coin.size + 5}, pRect)) {
             coin.collected = true;
             coinsCollected++;
+            totalCoins++; // persistent banking per coin collect
+            saveProgress();
             createParticles(coin.x, coin.y, '#FFD700');
             updateUI();
             
@@ -472,12 +662,12 @@ let lastTime = 0;
 function gameLoop(time) {
     if (gameState === 'playing') {
         updatePhysics();
+        updateParticles();
+        draw();
     }
-    updateParticles();
-    draw();
     requestAnimationFrame(gameLoop);
 }
 
-// Start
-loadLevel(0);
+// Initialization
+updateMenuUI();
 requestAnimationFrame(gameLoop);

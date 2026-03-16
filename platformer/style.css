@@ -159,3 +159,129 @@ canvas {
     color: #fff;
     font-family: monospace;
 }
+
+/* Menu Styles */
+.menu {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    background: var(--canvas-bg);
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 
+        0 20px 50px rgba(0,0,0,0.5),
+        0 0 0 4px rgba(69, 162, 158, 0.3),
+        0 0 30px rgba(102, 252, 241, 0.2);
+    width: 600px;
+    max-width: 90vw;
+}
+
+.menu.active {
+    display: flex;
+}
+
+.menu h2 {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(102, 252, 241, 0.4);
+}
+
+.total-coins-display {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: rgba(11, 12, 16, 0.7);
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: #fff;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+button {
+    background: linear-gradient(135deg, var(--secondary-color), #2b6a67);
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 10px 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    width: 80%;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    box-shadow: 0 0 20px rgba(102, 252, 241, 0.4);
+}
+
+#shop-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.shop-item {
+    background: rgba(11, 12, 16, 0.5);
+    border: 1px solid rgba(102, 252, 241, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.shop-item:hover {
+    background: rgba(69, 162, 158, 0.2);
+    border-color: var(--primary-color);
+}
+
+.skin-preview {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px;
+}
+
+.shop-item h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+}
+
+.shop-item .price {
+    font-weight: bold;
+    color: #FFD700;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.shop-item button {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+}
+
+.shop-item button:disabled {
+    background: #333;
+    color: #777;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
