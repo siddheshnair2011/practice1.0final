@@ -6,6 +6,7 @@ const coinDisplay = document.getElementById('coin-display');
 const messageOverlay = document.getElementById('message-overlay');
 const messageDisplay = document.getElementById('message');
 const instructionDisplay = document.querySelector('.instruction');
+const btnReturnMenu = document.getElementById('btn-return-menu'); // New btn
 
 // Menu Elements
 const homeMenu = document.getElementById('home-menu');
@@ -49,6 +50,19 @@ function updateMenuUI() {
     renderShop();
 }
 
+function stopPlayingAndGoToMenu() {
+    gameWrapper.style.display = 'none';
+    controlsHint.style.display = 'none';
+    messageOverlay.classList.remove('active');
+    homeMenu.classList.add('active');
+    gameState = 'menu';
+    updateMenuUI();
+}
+
+btnReturnMenu.addEventListener('click', () => {
+    stopPlayingAndGoToMenu();
+});
+
 btnPlay.addEventListener('click', () => {
     homeMenu.classList.remove('active');
     gameWrapper.style.display = 'block';
@@ -62,12 +76,14 @@ btnShop.addEventListener('click', () => {
     homeMenu.classList.remove('active');
     shopMenu.classList.add('active');
     gameState = 'shop';
+    updateMenuUI(); // Ensure layout calculates
 });
 
 btnBack.addEventListener('click', () => {
     shopMenu.classList.remove('active');
     homeMenu.classList.add('active');
     gameState = 'menu';
+    updateMenuUI();
 });
 
 function renderShop() {
@@ -124,10 +140,14 @@ const player = {
     gravity: 0.6,
     friction: 0.85,
     grounded: false,
-    color: '#66fcf1',
+    color: localStorage.getItem('neonHopperSkins') ? (JSON.parse(localStorage.getItem('neonHopperSkins'))[JSON.parse(localStorage.getItem('neonHopperSkins')).length-1]) : '#66fcf1', // Default to last unlocked, or reset when equipping
     boostTimer: 0,
-    wallSlidingDir: 0 // -1 left wall, 1 right wall, 0 no wall
+    wallSlidingDir: 0 
 };
+// Ensure active skin on page load is what is currently equipped visually
+if (unlockedSkins.length > 0) {
+    player.color = unlockedSkins[unlockedSkins.length-1]; // Lazy equip the latest unlocked
+}
 
 const keys = {
     ArrowLeft: false,
@@ -137,126 +157,131 @@ const keys = {
 
 // Level Design using new Mechanics
 const levels = [
-    // Level 1: Introduction to basics & jump pads
+    // Level 1: Very easy, teaches walking and basic jumping
     {
-        worldWidth: 1500,
+        worldWidth: 1600,
         worldHeight: 800,
         startX: 50,
         startY: 500,
         requiredCoins: 3,
         platforms: [
             { x: 0, y: 700, w: 600, h: 100 },
-            { x: 700, y: 500, w: 200, h: 50 },
-            { x: 1100, y: 300, w: 400, h: 100 }
-        ],
-        jumpPads: [
-            { x: 500, y: 680, w: 40, h: 20 }
-        ],
-        speedBoosts: [],
-        spikes: [
-            { x: 600, y: 770, w: 500, h: 30 }
-        ],
-        hazards: [],
-        coins: [
-            { x: 300, y: 650, size: 12, collected: false },
-            { x: 800, y: 450, size: 12, collected: false },
-            { x: 1300, y: 250, size: 12, collected: false }
-        ]
-    },
-    // Level 2: Introduction to Wall Jumping
-    {
-        worldWidth: 1200,
-        worldHeight: 900,
-        startX: 50,
-        startY: 700,
-        requiredCoins: 4,
-        platforms: [
-            { x: 0, y: 800, w: 400, h: 100 },
-            { x: 500, y: 400, w: 100, h: 500 }, // huge pillar
-            { x: 700, y: 200, w: 100, h: 700 }, // huge pillar
-            { x: 950, y: 150, w: 250, h: 100 }
+            { x: 750, y: 700, w: 900, h: 100 },
         ],
         jumpPads: [],
         speedBoosts: [],
-        spikes: [
-            { x: 400, y: 850, w: 800, h: 50 }
-        ],
+        spikes: [],
         hazards: [],
         coins: [
-            { x: 250, y: 750, size: 12, collected: false },
-            { x: 600, y: 550, size: 12, collected: false }, // Between pillars
-            { x: 600, y: 350, size: 12, collected: false }, // Between pillars higher
-            { x: 1050, y: 100, size: 12, collected: false }
+            { x: 400, y: 650, size: 12, collected: false },
+            { x: 900, y: 650, size: 12, collected: false },
+            { x: 1300, y: 650, size: 12, collected: false }
+        ],
+        texts: [
+            { text: "Welcome to Neon Hopper!", x: 100, y: 550, size: 36, color: "#66fcf1" },
+            { text: "Use Left/Right Arrows to Move.", x: 100, y: 600, size: 20, color: "#c5c6c7" },
+            { text: "Use Up Arrow to Jump.", x: 600, y: 550, size: 24, color: "#66fcf1" },
+            { text: "Collect all coins to beat the level!", x: 1000, y: 550, size: 24, color: "#FFD700" }
         ]
     },
-    // Level 3: Introduction to Speed Boosts
-    {
-        worldWidth: 2500,
-        worldHeight: 600,
-        startX: 50,
-        startY: 400,
-        requiredCoins: 3,
-        platforms: [
-            { x: 0, y: 500, w: 300, h: 100 },
-            { x: 400, y: 500, w: 500, h: 100 },
-            { x: 1200, y: 500, w: 1300, h: 100 },
-            { x: 1400, y: 350, w: 100, h: 20 }
-        ],
-        jumpPads: [],
-        speedBoosts: [
-            { x: 600, y: 450, size: 15, collected: false }
-        ],
-        spikes: [
-            { x: 900, y: 480, w: 300, h: 20 }
-        ],
-        hazards: [
-            { x: 300, y: 550, w: 100, h: 50 } // Lava
-        ],
-        coins: [
-            { x: 200, y: 450, size: 12, collected: false },
-            { x: 1500, y: 450, size: 12, collected: false },
-            { x: 1450, y: 300, size: 12, collected: false }
-        ]
-    },
-    // Level 4: Combining Mechanics
+    // Level 2: Teaches Spikes and Lava Hazards
     {
         worldWidth: 2000,
+        worldHeight: 800,
+        startX: 50,
+        startY: 500,
+        requiredCoins: 4,
+        platforms: [
+            { x: 0, y: 700, w: 400, h: 100 },
+            { x: 550, y: 650, w: 200, h: 20 },
+            { x: 900, y: 700, w: 400, h: 100 },
+            { x: 1450, y: 600, w: 550, h: 200 }
+        ],
+        jumpPads: [],
+        speedBoosts: [],
+        spikes: [
+            { x: 200, y: 680, w: 100, h: 20 },
+            { x: 1000, y: 680, w: 200, h: 20 }
+        ],
+        hazards: [
+            { x: 400, y: 750, w: 150, h: 50 }, // lava gap 1
+            { x: 1300, y: 750, w: 150, h: 50 } // lava gap 2
+        ],
+        coins: [
+            { x: 250, y: 600, size: 12, collected: false }, // above spike
+            { x: 650, y: 580, size: 12, collected: false }, // on floating plat
+            { x: 1100, y: 600, size: 12, collected: false }, // above spike 2
+            { x: 1600, y: 550, size: 12, collected: false }
+        ],
+        texts: [
+            { text: "Avoid red obstacles! Spikes and Lava will instantly reset you.", x: 50, y: 450, size: 24, color: "#ff3366" },
+            { text: "If you die, the level completely restarts.", x: 50, y: 490, size: 18, color: "#c5c6c7" }
+        ]
+    },
+    // Level 3: Teaches Wall Jumping
+    {
+        worldWidth: 1500,
         worldHeight: 1200,
         startX: 50,
         startY: 1000,
-        requiredCoins: 6,
+        requiredCoins: 3,
         platforms: [
-            { x: 0, y: 1100, w: 300, h: 100 },
-            { x: 500, y: 900, w: 100, h: 300 }, // Wall jump pillar
-            { x: 750, y: 700, w: 150, h: 20 },
-            { x: 1000, y: 700, w: 100, h: 500 }, // Tall obstacle
-            { x: 1200, y: 500, w: 200, h: 20 },
-            { x: 1600, y: 300, w: 400, h: 900 }
+            { x: 0, y: 1100, w: 400, h: 100 },
+            { x: 500, y: 700, w: 100, h: 500 }, // Wall 1
+            { x: 750, y: 500, w: 100, h: 700 }, // Wall 2
+            { x: 950, y: 450, w: 550, h: 100 }
         ],
-        jumpPads: [
-            { x: 800, y: 680, w: 40, h: 20 },
-            { x: 1300, y: 480, w: 40, h: 20 }
-        ],
-        speedBoosts: [
-            { x: 150, y: 1050, size: 15, collected: false }
-        ],
+        jumpPads: [],
+        speedBoosts: [],
         spikes: [
-            { x: 300, y: 1150, w: 200, h: 50 },
-            { x: 600, y: 1150, w: 400, h: 50 },
-            { x: 900, y: 680, w: 100, h: 20 }, // Spikes on top of tall platform
-            { x: 1100, y: 1150, w: 500, h: 50 }
+            { x: 400, y: 1150, w: 1100, h: 50 } // spikes on bottom
         ],
         hazards: [],
         coins: [
-            { x: 600, y: 800, size: 12, collected: false },
-            { x: 600, y: 600, size: 12, collected: false },
-            { x: 1050, y: 500, size: 12, collected: false }, // requires wall jump
-            { x: 1450, y: 250, size: 12, collected: false },
-            { x: 1750, y: 250, size: 12, collected: false },
-            { x: 1900, y: 250, size: 12, collected: false }
+            { x: 300, y: 1050, size: 12, collected: false },
+            { x: 675, y: 800, size: 12, collected: false }, // Between walls
+            { x: 1100, y: 400, size: 12, collected: false }
+        ],
+        texts: [
+            { text: "Jump into a wall to slide down slowly.", x: 50, y: 950, size: 24, color: "#66fcf1" },
+            { text: "Press Jump while pushing against a wall", x: 600, y: 1050, size: 20, color: "#fff" },
+            { text: "to WALL KICK upwards!", x: 600, y: 1080, size: 20, color: "#fff" }
         ]
     },
-    // Level 5: Parkour Cave
+    // Level 4: Teaches Jump Pads and Speed Boosts
+    {
+        worldWidth: 2500,
+        worldHeight: 1000,
+        startX: 50,
+        startY: 800,
+        requiredCoins: 4,
+        platforms: [
+            { x: 0, y: 900, w: 400, h: 100 },
+            { x: 600, y: 600, w: 200, h: 50 }, // high up pad destination
+            { x: 1000, y: 600, w: 1500, h: 100 } // long stretch
+        ],
+        jumpPads: [
+            { x: 300, y: 880, w: 50, h: 20 }
+        ],
+        speedBoosts: [
+            { x: 1100, y: 550, size: 15, collected: false }
+        ],
+        spikes: [
+            { x: 400, y: 950, w: 2100, h: 50 } // deadly floor
+        ],
+        hazards: [],
+        coins: [
+            { x: 325, y: 650, size: 12, collected: false }, // in the air above pad
+            { x: 700, y: 550, size: 12, collected: false }, // on high platform
+            { x: 1500, y: 550, size: 12, collected: false },
+            { x: 2200, y: 550, size: 12, collected: false }
+        ],
+        texts: [
+            { text: "Step on Jump Pads to launch into the air!", x: 50, y: 750, size: 24, color: "#00ffcc" },
+            { text: "Grab Speed Boosts (>>) to zoom across large gaps!", x: 1000, y: 500, size: 24, color: "#00ffcc" }
+        ]
+    },
+    // Level 5: Parkour Cave (Combining mechanics)
     {
         worldWidth: 1500,
         worldHeight: 1800,
@@ -290,6 +315,9 @@ const levels = [
             { x: 1200, y: 800, size: 12, collected: false },
             { x: 1150, y: 550, size: 12, collected: false }, // Between upper pillars
             { x: 600, y: 150, size: 12, collected: false }
+        ],
+        texts: [
+             { text: "No more tutorials! Put your skills to the test.", x: 50, y: 1550, size: 20, color: "#fff" }
         ]
     },
     // Level 6: The Ultimate Gauntlet
@@ -344,7 +372,8 @@ const levels = [
             { x: 3350, y: 300, size: 12, collected: false }, // jump pad ascension
             { x: 3050, y: 150, size: 12, collected: false }, // jump pad ascension
             { x: 3400, y: 50, size: 12, collected: false }   // Final coin
-        ]
+        ],
+        texts: []
     }
 ];
 
@@ -353,6 +382,7 @@ let particles = [];
 
 function loadLevel(index) {
     if (index >= levels.length) {
+        // Just let them keep playing or exit. We will exit them.
         gameState = 'game_won';
         messageDisplay.innerText = "YOU WIN!";
         instructionDisplay.innerText = "All levels completed! Press [ENTER] for Home";
@@ -360,7 +390,9 @@ function loadLevel(index) {
         return;
     }
     
-    level = JSON.parse(JSON.stringify(levels[index])); // Deep copy
+    // Deep clone the level so we don't permanently modify the template's collected coins
+    level = JSON.parse(JSON.stringify(levels[index])); 
+    
     player.x = level.startX;
     player.y = level.startY;
     player.vx = 0;
@@ -368,7 +400,9 @@ function loadLevel(index) {
     player.boostTimer = 0;
     player.maxSpeed = player.baseMaxSpeed;
     player.speed = player.baseSpeed;
+    
     coinsCollected = 0;
+    
     gameState = 'playing';
     messageOverlay.classList.remove('active');
     particles = [];
@@ -378,14 +412,12 @@ function loadLevel(index) {
 function resetLevel() {
     createDeathParticles(player.x + player.width/2, player.y + player.height/2);
     player.x = -1000;
+    
+    // Wait for death animation then restart from clean slate (coins reset, etc)
     setTimeout(() => {
-        player.x = level.startX;
-        player.y = level.startY;
-        player.vx = 0;
-        player.vy = 0;
-        player.boostTimer = 0;
-        player.maxSpeed = player.baseMaxSpeed;
-        player.speed = player.baseSpeed;
+        if(gameState === 'playing') {
+            loadLevel(currentLevelIndex);
+        }
     }, 500);
 }
 
@@ -452,13 +484,13 @@ window.addEventListener('keydown', (e) => {
             currentLevelIndex++;
             loadLevel(currentLevelIndex);
         } else if (gameState === 'game_won') {
-            gameWrapper.style.display = 'none';
-            controlsHint.style.display = 'none';
-            homeMenu.classList.add('active');
-            messageOverlay.classList.remove('active');
-            gameState = 'menu';
-            updateMenuUI();
+            stopPlayingAndGoToMenu();
         }
+    }
+    
+    // Escape goes to menu
+    if (e.code === 'Escape' && (gameState === 'playing' || gameState === 'level_complete')) {
+        stopPlayingAndGoToMenu();
     }
 });
 
@@ -627,6 +659,7 @@ function updatePhysics() {
         };
         if (checkCollision(player, spikeHitbox)) {
             resetLevel();
+            return; // stop physics
         }
     }
 
@@ -640,12 +673,14 @@ function updatePhysics() {
         };
         if (checkCollision(player, hazardHitbox)) {
             resetLevel();
+            return; 
         }
     }
     
     // Death pit bounds check
     if (player.y > level.worldHeight + 200 || player.y > (level.worldHeight || 2000)) {
         resetLevel();
+        return;
     }
 
     // Coins Check
@@ -653,12 +688,15 @@ function updatePhysics() {
         if (!coin.collected && checkCircleRectCollision({x: coin.x, y: coin.y, size: coin.size + 5}, pRect)) {
             coin.collected = true;
             coinsCollected++;
-            totalCoins++; // persistent banking per coin collect
-            saveProgress();
             createParticles(coin.x, coin.y, '#FFD700');
             updateUI();
             
             if (coinsCollected >= level.requiredCoins) {
+                // Wait until level completed to actually store coins persistently
+                // so they can't farm coins by dying
+                totalCoins += level.requiredCoins; 
+                saveProgress();
+
                 gameState = 'level_complete';
                 messageDisplay.innerText = "LEVEL COMPLETE";
                 instructionDisplay.innerText = "Press [ENTER] for next level";
@@ -705,9 +743,8 @@ function draw() {
     if (cameraX < 0) cameraX = 0;
     if (cameraX > level.worldWidth - canvas.width) cameraX = level.worldWidth - canvas.width;
     
-    // Some levels don't have worldHeight set yet, default to safety
     let maxCamY = (level.worldHeight || 1500) - canvas.height;
-    if (cameraY < -200) cameraY = -200; // allow seeing jumps slightly above 0
+    if (cameraY < -200) cameraY = -200; 
     if (cameraY > maxCamY) cameraY = maxCamY;
 
     ctx.save();
@@ -715,6 +752,18 @@ function draw() {
 
     drawGrid();
     
+    // Draw Texts
+    if (level.texts) {
+        for (const t of level.texts) {
+            ctx.fillStyle = t.color || '#fff';
+            ctx.font = `600 ${t.size}px Outfit, sans-serif`;
+            ctx.shadowColor = t.color || '#fff';
+            ctx.shadowBlur = 10;
+            ctx.fillText(t.text, t.x, t.y);
+            ctx.shadowBlur = 0;
+        }
+    }
+
     // Draw Platforms 
     ctx.fillStyle = '#111';
     ctx.strokeStyle = '#45a29e';
@@ -873,9 +922,13 @@ function draw() {
 function gameLoop(time) {
     if (gameState === 'playing') {
         updatePhysics();
-        updateParticles();
+    }
+    // Update visuals during menu, success screen, etc.
+    updateParticles(); 
+    if(gameState === 'playing' || gameState === 'level_complete') {
         draw();
     }
+    
     requestAnimationFrame(gameLoop);
 }
 

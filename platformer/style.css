@@ -87,6 +87,28 @@ canvas {
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
+.ui-btn {
+    pointer-events: auto;
+    background: rgba(11, 12, 16, 0.7);
+    padding: 8px 16px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(102, 252, 241, 0.5);
+    color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    margin-left: 10px;
+}
+
+.ui-btn:hover {
+    background: rgba(69, 162, 158, 0.4);
+    color: #fff;
+}
+
 .coin-icon {
     display: inline-block;
     width: 20px;
